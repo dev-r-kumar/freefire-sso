@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Fire SSO - Ban Checker</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        background: #090909;
+        color: white;
+        overflow-x: hidden;
+      }
+
+      /* ================= HEADER ================= */
+
+      .hero {
+        width: 100%;
+        height: 420px;
+        position: relative;
+        background:
+          linear-gradient(to bottom, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.92)),
+          url("{{url_for('static', filename='hero-background.png')}}");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-bottom: 3px solid #ff0000;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 0, 0, 0.08);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero h1 {
+        font-size: 58px;
+        color: #ff1a1a;
+        text-shadow: 0 0 15px #ff0000;
+        letter-spacing: 2px;
+      }
+
+      .hero p {
+        margin-top: 12px;
+        font-size: 18px;
+        color: #ddd;
+      }
+
+      /* ================= CARD ================= */
+
+      .container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: -70px;
+        position: relative;
+        z-index: 10;
+        padding: 20px;
+      }
+
+      .card {
+        width: 420px;
+        background: #111;
+        border: 2px solid #ff0000;
+        border-radius: 18px;
+        padding: 35px;
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.35);
+      }
+
+      .card h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #ff2b2b;
+        font-size: 30px;
+      }
+
+      .input-box {
+        margin-bottom: 20px;
+      }
+
+      .input-box label {
+        display: block;
+        margin-bottom: 8px;
+        color: #ccc;
+        font-size: 15px;
+      }
+
+      .input-box input {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        outline: none;
+        border-radius: 10px;
+        background: #1c1c1c;
+        color: white;
+        border: 1px solid #333;
+        font-size: 16px;
+        transition: 0.3s;
+      }
+
+      .input-box input:focus {
+        border-color: #ff0000;
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      }
+
+      .check-btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #ff0000, #b30000);
+        color: white;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .check-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      }
+
+      /* ================= RESULT ================= */
+
+      .result {
+        margin-top: 25px;
+        padding: 18px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        display: none;
+      }
+
+      .safe {
+        background: #081b08;
+        border: 1px solid #00ff66;
+        color: #00ff66;
+      }
+
+      .banned {
+        background: #220808;
+        border: 1px solid #ff2b2b;
+        color: #ff2b2b;
+      }
+
+      footer {
+        margin-top: 80px;
+        text-align: center;
+        color: #666;
+        padding-bottom: 20px;
+        font-size: 14px;
+      }
+
+      @media (max-width: 600px) {
+        .hero {
+          height: 320px;
+        }
+
+        .hero h1 {
+          font-size: 38px;
+        }
+
+        .card {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================= HERO SECTION ================= -->
+
+    <section class="hero">
+      <div class="hero-content">
+        <h1>FREE FIRE SSO</h1>
+        <p>Check Your Account Ban Status Instantly</p>
+      </div>
+    </section>
+
+    <!-- ================= CHECKER ================= -->
+
+    <div class="container">
+      <div class="card">
+        <h2>UID Ban Checker</h2>
+
+        <div class="input-box">
+          <label>Enter Free Fire UID</label>
+          <input type="text" id="uid" placeholder="Example: 123456789" />
+        </div>
+
+        <button class="check-btn" onclick="checkBan()">CHECK STATUS</button>
+
+        <div class="result" id="resultBox"></div>
+      </div>
+    </div>
+
+    <footer>© 2026 Free Fire SSO. Official Moderators of Garena SG</footer>
+
+    <!-- ================= SCRIPT ================= -->
+
+    <script>
+      async function checkBan() {
+        const uid = document.getElementById("uid").value.trim();
+        const resultBox = document.getElementById("resultBox");
+
+        if (uid === "") {
+          resultBox.style.display = "block";
+          resultBox.className = "result banned";
+          resultBox.innerHTML = "Please enter a UID.";
+          return;
+        }
+
+        const response = await fetch(
+          `http://192.168.1.185:5555/check-ban?player-uid=${uid}`,
+          {
+            method: "GET",
+          },
+        );
+
+        const data = await response.json();
+
+        if (
+          data["msg"] != "There is no proof that the player is using cheats."
+        ) {
+          resultBox.style.display = "block";
+          resultBox.className = "result banned";
+          resultBox.innerHTML = `${data["msg"]}`;
+        } else {
+          resultBox.style.display = "block";
+          resultBox.className = "result safe";
+          resultBox.innerHTML = `${data["msg"]}`;
+        }
+      }
+    </script>
+  </body>
+</html>
