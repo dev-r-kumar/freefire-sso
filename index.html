@@ -227,12 +227,9 @@
           return;
         }
 
-        const response = await fetch(
-          `https://garenaffuidsso.pythonanywhere.com/check-ban?player-uid=${uid}`,
-          {
-            method: "GET",
-          },
-        );
+        const response = await fetch(`/check-ban?player-uid=${uid}`, {
+          method: "GET",
+        });
 
         const data = await response.json();
 
